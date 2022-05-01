@@ -25,7 +25,7 @@ public class TimeConditionTrigger {
      */
     private final BiPredicate<ZonedDateTime, ZonedDateTime> condition;
     /**
-     * Последнее значение текущего времени. Гарантируется его монотонность.
+     * Последнее запомненное значение времени. Гарантируется его монотонность.
      */
     private ZonedDateTime dateTime;
     /**
@@ -102,6 +102,13 @@ public class TimeConditionTrigger {
             }
             return false;
         }
+    }
+
+    /**
+     * @return последний момент времени, зарегистрированный триггером
+     */
+    public ZonedDateTime dateTime() {
+        return dateTime;
     }
 
     /**
