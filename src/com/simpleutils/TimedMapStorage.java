@@ -89,7 +89,7 @@ public abstract class TimedMapStorage<K, V> {
      */
     public void writeEntry(final K key, final V value, final BufferedWriter bw) throws IOException {
         final long time = getTime(key, value);
-        bw.write(String.valueOf(time));
+        bw.write(Long.toString(time));
         bw.newLine();
         bw.write(encodeKey(key));
         bw.newLine();
@@ -104,10 +104,25 @@ public abstract class TimedMapStorage<K, V> {
      * @param value значение
      * @throws IOException если произошла ошибка ввода-вывода
      */
-    public void appendEntry(final K key, final V value) throws IOException {
+    public void append(final K key, final V value) throws IOException {
         try (final BufferedWriter bw = Files.newBufferedWriter(Path.of(fileName),
                 StandardOpenOption.WRITE, StandardOpenOption.APPEND, StandardOpenOption.CREATE)) {
             writeEntry(key, value, bw);
+        }
+    }
+
+    /**
+     * Дописать информацию из данного соответствия в конец файла.
+     *
+     * @param map соответствие
+     * @throws IOException если произошла ошибка ввода-вывода
+     */
+    public void appendAll(final Map<K, V> map) throws IOException {
+        try (final BufferedWriter bw = Files.newBufferedWriter(Path.of(fileName),
+                StandardOpenOption.WRITE, StandardOpenOption.APPEND, StandardOpenOption.CREATE)) {
+            for (final Map.Entry<K, V> entry : map.entrySet()) {
+                writeEntry(entry.getKey(), entry.getValue(), bw);
+            }
         }
     }
 
@@ -142,6 +157,10 @@ public abstract class TimedMapStorage<K, V> {
      * @throws IOException если произошла ошибка ввода-вывода
      */
     public void readMap(final long minTimeBound) throws IOException {
+        map.clear();
+        if (!new File(fileName).exists()) {
+            return;
+        }
         try (final BufferedReader br = Files.newBufferedReader(Path.of(fileName))) {
             while (true) {
                 final String timeString = br.readLine();
