@@ -31,6 +31,15 @@ public class DelayedRunnables {
     }
 
     /**
+     * Поставить код в очередь на выполнение без задержки.
+     *
+     * @param runnable код
+     */
+    public void submit(final Runnable runnable) {
+        submit(runnable, 0, TimeUnit.NANOSECONDS);
+    }
+
+    /**
      * @return код для выполнения или {@code null}, если его нет
      */
     public Runnable poll() {
