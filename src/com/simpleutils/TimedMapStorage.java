@@ -21,11 +21,11 @@ public abstract class TimedMapStorage<K, V> {
     /**
      * Соответствие.
      */
-    private final Map<K, V> map;
+    protected final Map<K, V> map;
     /**
      * Имя файла для сохранения.
      */
-    private final String fileName;
+    protected final String fileName;
 
     /**
      * Конструктор.
