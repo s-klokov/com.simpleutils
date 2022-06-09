@@ -39,6 +39,12 @@ public class QuikConnect {
      * Длительность паузы рабочего цикла в миллисекундах в случае ошибок.
      */
     public volatile long errorSleepTimeout = 100L;
+    /**
+     * Надо ли сообщать об ошибках парсинга ответов слушателю.
+     * Значение {@code false} может использовано для исправления багов,
+     * когда из сокета приходят некорректные строки.
+     */
+    public volatile boolean raiseParseExceptionToListener = true;
 
     /**
      * Кодовая страница для текстовых сообщений.
@@ -227,7 +233,14 @@ public class QuikConnect {
                                 response.complete(jsonObject);
                             }
                         }
-                    } catch (final ParseException | ClassCastException e) {
+                    } catch (final ParseException e) {
+                        if (raiseParseExceptionToListener) {
+                            try {
+                                listener.onExceptionMN(e);
+                            } catch (final Exception ignored) {
+                            }
+                        }
+                    } catch (final ClassCastException e) {
                         try {
                             listener.onExceptionMN(e);
                         } catch (final Exception ignored) {
@@ -275,7 +288,14 @@ public class QuikConnect {
                                 response.complete(jsonObject);
                             }
                         }
-                    } catch (final ParseException | ClassCastException e) {
+                    } catch (final ParseException e) {
+                        if (raiseParseExceptionToListener) {
+                            try {
+                                listener.onExceptionCB(e);
+                            } catch (final Exception ignored) {
+                            }
+                        }
+                    } catch (final ClassCastException e) {
                         try {
                             listener.onExceptionCB(e);
                         } catch (final Exception ignored) {
