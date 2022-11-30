@@ -10,6 +10,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.TimeUnit;
 
 public class SimpleQuikListenerTest {
 
@@ -23,6 +24,13 @@ public class SimpleQuikListenerTest {
         logger.withLogLevel(AbstractLogger.TRACE);
 
         final SimpleQuikListener simpleQuikListener = new SimpleQuikListener();
+
+        simpleQuikListener.setRequestTimeout(1, TimeUnit.SECONDS);
+        simpleQuikListener.setCheckConnectedPeriod(1, TimeUnit.SECONDS);
+        simpleQuikListener.setExceptionPauseDuration(15, TimeUnit.SECONDS);
+        simpleQuikListener.setSubscriptionPeriod(10, TimeUnit.SECONDS);
+        simpleQuikListener.setOnlineDuration(15, TimeUnit.SECONDS);
+
         simpleQuikListener.setLogger(logger);
         simpleQuikListener.setLogPrefix(SimpleQuikListenerTest.class.getSimpleName() + ": ");
 
@@ -62,12 +70,7 @@ public class SimpleQuikListenerTest {
         }
 
         quikConnect.shutdown();
-
-        try {
-            Thread.sleep(500L);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        processRunnables(simpleQuikListener.queue);
     }
 
     private void processRunnables(final Queue<Runnable> queue) {

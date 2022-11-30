@@ -115,5 +115,6 @@ class QuikListenerTest extends AbstractQuikListener {
             }
         }
         quikConnect.shutdown();
+        quikListenerTest.processRunnables();
     }
 }

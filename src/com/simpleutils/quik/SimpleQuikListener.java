@@ -31,8 +31,6 @@ public class SimpleQuikListener extends AbstractQuikListener {
     protected boolean isSubscribed = false;
     protected ZonedDateTime nextSubscriptionTime = null;
 
-    public final Map<Long, JSONObject> transIdToTransReplyMap = new HashMap<>();
-
     public SimpleQuikListener() {
         executionThread = Thread.currentThread();
         callbackSubscriptionMap.put("OnDisconnected", "*");
@@ -143,16 +141,25 @@ public class SimpleQuikListener extends AbstractQuikListener {
         final String callback = (String) jsonObject.get("callback");
         queue.add(() -> {
             if (logger != null) {
-                logger.debug(() -> logPrefix + "onCallback " + callback);
+                logger.trace(() -> logPrefix + "onCallback " + callback);
                 logger.trace(() -> logPrefix + jsonObject);
             }
-            if ("OnDisconnected".equals(callback)) {
-                onDisconnected();
-            }
-            if ("OnTransReply".equals(callback)) {
-                onTransReply((JSONObject) jsonObject.get("arg1"));
-            }
+            processCallback(callback, jsonObject);
         });
+    }
+
+    /**
+     * Для реакции на коллбэки рекомендуется перегружать этот метод в потомках.
+     *
+     * @param callback   название коллбэка
+     * @param jsonObject JSON-объек с информацией о коллбэке
+     */
+    protected void processCallback(final String callback, final JSONObject jsonObject) {
+        switch (callback) {
+            case "OnConnected" -> onConnected();
+            case "OnDisconnected" -> onDisconnected();
+            default -> onUnknownCallback(callback);
+        }
     }
 
     @Override
@@ -181,30 +188,6 @@ public class SimpleQuikListener extends AbstractQuikListener {
         nextCheckConnectionTime = zdt;
         isSubscribed = false;
         nextSubscriptionTime = zdt;
-    }
-
-    protected void onConnected() {
-        final ZonedDateTime now = ZonedDateTime.now();
-        if (connectedSince == null) {
-            connectedSince = now;
-            if (logger != null) {
-                logger.debug(() -> logPrefix + "Quik is connected.");
-            }
-        }
-        if (logger != null) {
-            logger.trace(() -> logPrefix + "isOnline: " + isOnline() + ", connectedSince: " + connectedSince());
-        }
-        nextCheckConnectionTime = now.plus(checkConnectedPeriodMillis, ChronoUnit.MILLIS);
-    }
-
-    protected void onDisconnected() {
-        if (connectedSince != null) {
-            connectedSince = null;
-            if (logger != null) {
-                logger.debug(() -> logPrefix + "Quik is disconnected.");
-            }
-        }
-        nextCheckConnectionTime = ZonedDateTime.now().plus(checkConnectedPeriodMillis, ChronoUnit.MILLIS);
     }
 
     public void ensureConnection() {
@@ -333,13 +316,30 @@ public class SimpleQuikListener extends AbstractQuikListener {
         }
     }
 
-    protected void onTransReply(final JSONObject tr) {
-        try {
-            final long transId = (long) tr.get("trans_id");
-            if (transId != 0L) {
-                transIdToTransReplyMap.put(transId, tr);
+    protected void onConnected() {
+        final ZonedDateTime now = ZonedDateTime.now();
+        if (connectedSince == null) {
+            connectedSince = now;
+            if (logger != null) {
+                logger.debug(() -> logPrefix + "Quik is connected.");
             }
-        } catch (final NullPointerException | ClassCastException ignored) {
         }
+        if (logger != null) {
+            logger.trace(() -> logPrefix + "isOnline: " + isOnline() + ", connectedSince: " + connectedSince());
+        }
+        nextCheckConnectionTime = now.plus(checkConnectedPeriodMillis, ChronoUnit.MILLIS);
+    }
+
+    protected void onDisconnected() {
+        if (connectedSince != null) {
+            connectedSince = null;
+            if (logger != null) {
+                logger.debug(() -> logPrefix + "Quik is disconnected.");
+            }
+        }
+        nextCheckConnectionTime = ZonedDateTime.now().plus(checkConnectedPeriodMillis, ChronoUnit.MILLIS);
+    }
+
+    protected void onUnknownCallback(final String callback) {
     }
 }
