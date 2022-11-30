@@ -5,4 +5,5 @@ module com.simpleutils {
     exports com.simpleutils.logs;
     exports com.simpleutils.quik;
     exports com.simpleutils.socket;
+    exports com.simpleutils.quik.requests;
 }

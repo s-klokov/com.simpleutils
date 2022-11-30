@@ -1,7 +1,9 @@
-package com.simpleutils.quik;
+package com.simpleutils.quik.test;
 
 import com.simpleutils.logs.AbstractLogger;
 import com.simpleutils.logs.SimpleLogger;
+import com.simpleutils.quik.AbstractQuikListener;
+import com.simpleutils.quik.QuikConnect;
 import org.json.simple.JSONObject;
 
 import java.time.ZonedDateTime;
@@ -9,12 +11,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-class TestListener extends AbstractQuikListener {
+class QuikListenerTest extends AbstractQuikListener {
 
     private static final AbstractLogger LOGGER = new SimpleLogger();
     private boolean isOpen = false;
 
-    public TestListener() {
+    public QuikListenerTest() {
         executionThread = Thread.currentThread();
     }
 
@@ -64,16 +66,16 @@ class TestListener extends AbstractQuikListener {
     }
 
     public static void main(final String[] args) {
-        final TestListener testListener = new TestListener();
-        final QuikConnect quikConnect = new QuikConnect("192.168.15.19", 10001, 10002, "test", testListener);
-        testListener.setQuikConnect(quikConnect);
+        final QuikListenerTest quikListenerTest = new QuikListenerTest();
+        final QuikConnect quikConnect = new QuikConnect("127.0.0.1", 10001, 10002, "test", quikListenerTest);
+        quikListenerTest.setQuikConnect(quikConnect);
         quikConnect.start();
-        final ZonedDateTime stoppingTime = ZonedDateTime.now().plus(1, ChronoUnit.HOURS);
+        final ZonedDateTime stoppingTime = ZonedDateTime.now().plus(1, ChronoUnit.MINUTES);
         int counter = 0;
         final StringBuilder sb = new StringBuilder();
         while (ZonedDateTime.now().isBefore(stoppingTime)) {
-            testListener.processRunnables();
-            if (testListener.isOpen) {
+            quikListenerTest.processRunnables();
+            if (quikListenerTest.isOpen) {
                 sb.setLength(0);
                 sb.append(++counter).append(": ");
                 try {
@@ -89,7 +91,7 @@ class TestListener extends AbstractQuikListener {
                     json = quikConnect.executeCB("OnAllTrade", "*", 5, TimeUnit.SECONDS);
                     sb.append(json.get("result")).append("; ");
                     LOGGER.info(sb.toString());
-                    //pause(250L);
+                    pause(250L);
                 } catch (final InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
