@@ -39,7 +39,7 @@ public class SimpleQuikListenerTest {
         simpleQuikListener.addSecurityCandles(ClassSecCode.of("TQBR", "LKOH"), List.of(30));
 
         final QuikConnect quikConnect = new QuikConnect(
-                "127.0.0.1",
+                "localhost",
                 10001,
                 10002,
                 SimpleQuikListenerTest.class.getSimpleName(),

@@ -65,6 +65,7 @@ class QuikListenerTest extends AbstractQuikListener {
         }
     }
 
+    @SuppressWarnings("BusyWait")
     public static void main(final String[] args) {
         final QuikListenerTest quikListenerTest = new QuikListenerTest();
         final QuikConnect quikConnect = new QuikConnect("127.0.0.1", 10001, 10002, "test", quikListenerTest);
@@ -91,16 +92,26 @@ class QuikListenerTest extends AbstractQuikListener {
                     json = quikConnect.executeCB("OnAllTrade", "*", 5, TimeUnit.SECONDS);
                     sb.append(json.get("result")).append("; ");
                     LOGGER.info(sb.toString());
-                    pause(250L);
+                    Thread.sleep(250L);
                 } catch (final InterruptedException e) {
                     Thread.currentThread().interrupt();
                     break;
                 } catch (final Exception e) {
                     LOGGER.log(AbstractLogger.ERROR, "Exception", e);
-                    pause(1000L);
+                    try {
+                        Thread.sleep(1000L);
+                    } catch (final InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
                 }
             } else {
-                pause(1000L);
+                try {
+                    Thread.sleep(1000L);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
             }
         }
         quikConnect.shutdown();

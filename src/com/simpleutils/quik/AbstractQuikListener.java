@@ -31,17 +31,4 @@ public abstract class AbstractQuikListener implements QuikListener {
     public void submit(final Runnable runnable) {
         queue.add(runnable);
     }
-
-    /**
-     * Сделать паузу указанной длительности.
-     *
-     * @param millis длительность паузы в миллисекундах
-     */
-    public static void pause(final long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (final InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
 }

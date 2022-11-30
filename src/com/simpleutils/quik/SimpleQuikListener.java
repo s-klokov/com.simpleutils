@@ -307,9 +307,10 @@ public class SimpleQuikListener extends AbstractQuikListener {
             final JSONObject result = (JSONObject) response.get("result");
             RuntimeException runtimeException = null;
             for (final int interval : intervals) {
-                if (!"ok".equals(result.get(String.valueOf(interval)))) {
+                final String key = String.valueOf(interval);
+                if (!"ok".equals(result.get(key))) {
                     final String message = "Cannot subscribe to " + classSecCode
-                            + " candles for interval " + interval + ": " + result.get(interval) + ".";
+                            + " candles for interval " + interval + ": " + result.get(key);
                     if (logger != null) {
                         logger.error(logPrefix + message);
                         runtimeException = new RuntimeException(message);
