@@ -40,7 +40,7 @@ public abstract class AbstractLogger {
         }
     }
 
-    protected static String getMessage(final Supplier<String> messageSupplier) {
+    protected String getMessage(final Supplier<String> messageSupplier) {
         try {
             return messageSupplier.get();
         } catch (final Throwable t) {
