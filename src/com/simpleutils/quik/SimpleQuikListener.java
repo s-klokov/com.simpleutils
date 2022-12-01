@@ -5,6 +5,7 @@ import com.simpleutils.quik.requests.CandlesSubscriptionRequest;
 import com.simpleutils.quik.requests.ParamSubscriptionRequest;
 import org.json.simple.JSONObject;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -13,11 +14,11 @@ import java.util.concurrent.TimeUnit;
 
 public class SimpleQuikListener extends AbstractQuikListener {
 
-    protected long requestTimeoutMillis = 5_000L;
-    protected long exceptionPauseDurationMillis = 65_000L;
-    protected long checkConnectedPeriodMillis = 5_000L;
-    protected long subscriptionPeriodMillis = 15_000L;
-    protected long onlineDurationMillis = 30_000L;
+    protected Duration requestTimeout = Duration.of(5, ChronoUnit.SECONDS);
+    protected Duration pauseAfterException = Duration.of(65, ChronoUnit.SECONDS);
+    protected Duration checkConnectedPeriod = Duration.of(5, ChronoUnit.SECONDS);
+    protected Duration subscriptionPeriod = Duration.of(15, ChronoUnit.SECONDS);
+    protected Duration onlineDuration = Duration.of(30, ChronoUnit.SECONDS);
 
     protected AbstractLogger logger = null;
     protected String logPrefix = "";
@@ -36,24 +37,24 @@ public class SimpleQuikListener extends AbstractQuikListener {
         callbackSubscriptionMap.put("OnDisconnected", "*");
     }
 
-    public void setRequestTimeout(final long duration, final TimeUnit unit) {
-        requestTimeoutMillis = unit.toMillis(duration);
+    public void setRequestTimeout(final Duration duration) {
+        requestTimeout = duration;
     }
 
-    public void setExceptionPauseDuration(final long duration, final TimeUnit unit) {
-        exceptionPauseDurationMillis = unit.toMillis(duration);
+    public void setPauseAfterException(final Duration duration) {
+        pauseAfterException = duration;
     }
 
-    public void setCheckConnectedPeriod(final long duration, final TimeUnit unit) {
-        checkConnectedPeriodMillis = unit.toMillis(duration);
+    public void setCheckConnectedPeriod(final Duration duration) {
+        checkConnectedPeriod = duration;
     }
 
-    public void setSubscriptionPeriod(final long duration, final TimeUnit unit) {
-        subscriptionPeriodMillis = unit.toMillis(duration);
+    public void setSubscriptionPeriod(final Duration duration) {
+        subscriptionPeriod = duration;
     }
 
-    public void setOnlineDuration(final long duration, final TimeUnit unit) {
-        onlineDurationMillis = unit.toMillis(duration);
+    public void setOnlineDuration(final Duration duration) {
+        onlineDuration = duration;
     }
 
     public void setLogger(final AbstractLogger logger) {
@@ -104,7 +105,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
 
     public boolean isOnline() {
         return isOpen && isSubscribed && connectedSince != null
-                && ZonedDateTime.now().isAfter(connectedSince.plus(onlineDurationMillis, ChronoUnit.MILLIS));
+                && ZonedDateTime.now().isAfter(connectedSince.plus(onlineDuration));
     }
 
     @Override
@@ -183,7 +184,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
     }
 
     protected void scheduleRecovery() {
-        final ZonedDateTime zdt = ZonedDateTime.now().plus(exceptionPauseDurationMillis, ChronoUnit.MILLIS);
+        final ZonedDateTime zdt = ZonedDateTime.now().plus(pauseAfterException);
         connectedSince = null;
         nextCheckConnectionTime = zdt;
         isSubscribed = false;
@@ -195,7 +196,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
             try {
                 final JSONObject response = quikConnect.executeMN(
                         "isConnected", null,
-                        requestTimeoutMillis, TimeUnit.MILLISECONDS);
+                        requestTimeout.toMillis(), TimeUnit.MILLISECONDS);
                 if (response.get("result").equals(1L)) {
                     onConnected();
                 } else {
@@ -219,7 +220,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
                 isSubscribed = true;
             } catch (final Exception e) {
                 isSubscribed = false;
-                nextSubscriptionTime = ZonedDateTime.now().plus(subscriptionPeriodMillis, ChronoUnit.MILLIS);
+                nextSubscriptionTime = ZonedDateTime.now().plus(subscriptionPeriod);
                 if (e instanceof InterruptedException) {
                     Thread.currentThread().interrupt();
                 }
@@ -249,7 +250,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
         final JSONObject response = quikConnect.executeCB(
                 callback,
                 filter,
-                requestTimeoutMillis, TimeUnit.MILLISECONDS);
+                requestTimeout.toMillis(), TimeUnit.MILLISECONDS);
         if (Boolean.TRUE.equals(response.get("status"))) {
             if (logger != null) {
                 logger.debug(() -> logPrefix + "Subscribed to callback " + callback + ".");
@@ -267,7 +268,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
                                                final Collection<String> parameters) throws ExecutionException, InterruptedException {
         final JSONObject response = quikConnect.executeMN(
                 new ParamSubscriptionRequest(classSecCode.classCode(), classSecCode.secCode(), parameters).getRequest(),
-                requestTimeoutMillis, TimeUnit.MILLISECONDS);
+                requestTimeout.toMillis(), TimeUnit.MILLISECONDS);
         if (Boolean.TRUE.equals(response.get("result"))) {
             if (logger != null) {
                 logger.debug(() -> logPrefix + "Subscribed to " + classSecCode + " " + parameters + ".");
@@ -285,7 +286,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
                                             final Collection<Integer> intervals) throws ExecutionException, InterruptedException {
         final JSONObject response = quikConnect.executeMN(
                 new CandlesSubscriptionRequest(classSecCode.classCode(), classSecCode.secCode(), intervals).getRequest(),
-                requestTimeoutMillis, TimeUnit.MILLISECONDS);
+                requestTimeout.toMillis(), TimeUnit.MILLISECONDS);
         try {
             final JSONObject result = (JSONObject) response.get("result");
             RuntimeException runtimeException = null;
@@ -327,7 +328,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
         if (logger != null) {
             logger.trace(() -> logPrefix + "isOnline: " + isOnline() + ", connectedSince: " + connectedSince());
         }
-        nextCheckConnectionTime = now.plus(checkConnectedPeriodMillis, ChronoUnit.MILLIS);
+        nextCheckConnectionTime = now.plus(checkConnectedPeriod);
     }
 
     protected void onDisconnected() {
@@ -337,7 +338,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
                 logger.debug(() -> logPrefix + "Quik is disconnected.");
             }
         }
-        nextCheckConnectionTime = ZonedDateTime.now().plus(checkConnectedPeriodMillis, ChronoUnit.MILLIS);
+        nextCheckConnectionTime = ZonedDateTime.now().plus(checkConnectedPeriod);
     }
 
     protected void onUnknownCallback(final String callback) {

@@ -7,6 +7,9 @@ import org.json.simple.parser.ParseException;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,19 +29,19 @@ public class QuikConnect {
     /**
      * Таймаут в миллисекундах перед повторной попыткой открыть сокеты в случае возникновения ошибок.
      */
-    public volatile long errorTimeout = 60_000L;
+    public volatile Duration errorTimeout = Duration.of(60, ChronoUnit.SECONDS);
     /**
      * Периодичность отправки ping-сообщений в миллисекундах.
      */
-    public volatile long pingTimeout = 15_000L;
+    public volatile Duration pingTimeout = Duration.of(15, ChronoUnit.SECONDS);
     /**
      * Длительность паузы рабочего цикла в миллисекундах в случае отсутствия сообщений.
      */
-    public volatile long idleSleepTimeout = 10L;
+    public volatile Duration idleSleepTimeout = Duration.of(10, ChronoUnit.MILLIS);
     /**
      * Длительность паузы рабочего цикла в миллисекундах в случае ошибок.
      */
-    public volatile long errorSleepTimeout = 100L;
+    public volatile Duration errorSleepTimeout = Duration.of(100, ChronoUnit.MILLIS);
     /**
      * Надо ли сообщать об ошибках парсинга ответов слушателю.
      * Значение {@code false} может использовано для исправления багов,
@@ -94,11 +97,11 @@ public class QuikConnect {
     /**
      * Момент возникновения ошибки взаимодействия с терминалом.
      */
-    private volatile long errorTime = 0L;
+    private volatile ZonedDateTime errorTime = ZonedDateTime.now().minus(1, ChronoUnit.YEARS);
     /**
      * Момент отправки сообщения "ping".
      */
-    private long lastPingTime = 0L;
+    private ZonedDateTime lastPingTime = ZonedDateTime.now().minus(1, ChronoUnit.YEARS);
     /**
      * Счётчик сообщений в одной итерации рабочего цикла.
      */
@@ -134,7 +137,7 @@ public class QuikConnect {
                     if (hasOpenSocketConnectors) {
                         closeSocketConnectors();
                     }
-                    if (System.currentTimeMillis() >= errorTime + errorTimeout) {
+                    if (ZonedDateTime.now().isAfter(errorTime.plus(errorTimeout))) {
                         hasErrorMN = false;
                         hasErrorCB = false;
                     }
@@ -150,7 +153,7 @@ public class QuikConnect {
                             scMN.open(charset);
                         } catch (final IOException e) {
                             hasErrorMN = true;
-                            errorTime = System.currentTimeMillis();
+                            errorTime = ZonedDateTime.now();
                             try {
                                 listener.onExceptionMN(e);
                             } catch (final Exception ignored) {
@@ -162,7 +165,7 @@ public class QuikConnect {
                             scCB.open(charset);
                         } catch (final IOException e) {
                             hasErrorCB = true;
-                            errorTime = System.currentTimeMillis();
+                            errorTime = ZonedDateTime.now();
                             try {
                                 listener.onExceptionCB(e);
                             } catch (final Exception ignored) {
@@ -206,7 +209,7 @@ public class QuikConnect {
                             s = scMN.receive();
                         } catch (final IOException e) {
                             hasErrorMN = true;
-                            errorTime = System.currentTimeMillis();
+                            errorTime = ZonedDateTime.now();
                             try {
                                 listener.onExceptionMN(e);
                             } catch (final Exception ignored) {
@@ -257,7 +260,7 @@ public class QuikConnect {
                             s = scCB.receive();
                         } catch (final IOException e) {
                             hasErrorCB = true;
-                            errorTime = System.currentTimeMillis();
+                            errorTime = ZonedDateTime.now();
                             try {
                                 listener.onExceptionCB(e);
                             } catch (final Exception ignored) {
@@ -310,24 +313,24 @@ public class QuikConnect {
                 }
             }
 
-            private void pause(final long millis) {
+            private void pause(final Duration duration) {
                 try {
-                    Thread.sleep(millis);
+                    Thread.sleep(duration.toMillis());
                 } catch (final InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }
 
             private void ensurePing() {
-                final long now = System.currentTimeMillis();
-                if (now >= lastPingTime + pingTimeout) {
+                final ZonedDateTime now = ZonedDateTime.now();
+                if (now.isAfter(lastPingTime.plus(pingTimeout))) {
                     synchronized (scMN) {
                         if (!hasErrorMN) {
                             try {
                                 scMN.send("ping");
                             } catch (final IOException e) {
                                 hasErrorMN = true;
-                                errorTime = System.currentTimeMillis();
+                                errorTime = ZonedDateTime.now();
                             }
                         }
                     }
@@ -337,7 +340,7 @@ public class QuikConnect {
                                 scCB.send("ping");
                             } catch (final IOException e) {
                                 hasErrorCB = true;
-                                errorTime = System.currentTimeMillis();
+                                errorTime = ZonedDateTime.now();
                             }
                         }
                     }
@@ -416,7 +419,7 @@ public class QuikConnect {
                 scMN.send(s);
             } catch (final IOException e) {
                 hasErrorMN = true;
-                errorTime = System.currentTimeMillis();
+                errorTime = ZonedDateTime.now();
                 throw e;
             }
         }
@@ -428,7 +431,7 @@ public class QuikConnect {
                 scCB.send(s);
             } catch (final IOException e) {
                 hasErrorCB = true;
-                errorTime = System.currentTimeMillis();
+                errorTime = ZonedDateTime.now();
                 throw e;
             }
         }

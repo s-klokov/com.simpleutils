@@ -6,11 +6,11 @@ import com.simpleutils.quik.ClassSecCode;
 import com.simpleutils.quik.QuikConnect;
 import com.simpleutils.quik.SimpleQuikListener;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Queue;
-import java.util.concurrent.TimeUnit;
 
 public class SimpleQuikListenerTest {
 
@@ -25,11 +25,11 @@ public class SimpleQuikListenerTest {
 
         final SimpleQuikListener simpleQuikListener = new SimpleQuikListener();
 
-        simpleQuikListener.setRequestTimeout(1, TimeUnit.SECONDS);
-        simpleQuikListener.setCheckConnectedPeriod(1, TimeUnit.SECONDS);
-        simpleQuikListener.setExceptionPauseDuration(15, TimeUnit.SECONDS);
-        simpleQuikListener.setSubscriptionPeriod(10, TimeUnit.SECONDS);
-        simpleQuikListener.setOnlineDuration(15, TimeUnit.SECONDS);
+        simpleQuikListener.setRequestTimeout(Duration.of(1, ChronoUnit.SECONDS));
+        simpleQuikListener.setCheckConnectedPeriod(Duration.of(1, ChronoUnit.SECONDS));
+        simpleQuikListener.setPauseAfterException(Duration.of(15, ChronoUnit.SECONDS));
+        simpleQuikListener.setSubscriptionPeriod(Duration.of(10, ChronoUnit.SECONDS));
+        simpleQuikListener.setOnlineDuration(Duration.of(15, ChronoUnit.SECONDS));
 
         simpleQuikListener.setLogger(logger);
         simpleQuikListener.setLogPrefix(SimpleQuikListenerTest.class.getSimpleName() + ": ");
