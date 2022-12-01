@@ -71,17 +71,19 @@ public class TextAreaLogger extends AbstractLogger {
     protected void print(final int level, final String s) {
         synchronized (mutex) {
             if (logTextArea != null) {
+                final JTextArea textArea = logTextArea;
                 SwingUtilities.invokeLater(() -> {
-                    truncate(logTextArea.getDocument(), logTruncationLength, logTargetLength);
-                    logTextArea.append(s);
-                    logTextArea.append("\r\n");
+                    truncate(textArea.getDocument(), logTruncationLength, logTargetLength);
+                    textArea.append(s);
+                    textArea.append("\r\n");
                 });
             }
             if (errTextArea != null && level >= errLevel) {
+                final JTextArea textArea = errTextArea;
                 SwingUtilities.invokeLater(() -> {
-                    truncate(errTextArea.getDocument(), errTruncationLength, errTargetLength);
-                    errTextArea.append(s);
-                    errTextArea.append("\r\n");
+                    truncate(textArea.getDocument(), errTruncationLength, errTargetLength);
+                    textArea.append(s);
+                    textArea.append("\r\n");
                 });
             }
         }
@@ -92,21 +94,23 @@ public class TextAreaLogger extends AbstractLogger {
         final String stackTrace = stackTraceString(thrown);
         synchronized (mutex) {
             if (logTextArea != null) {
+                final JTextArea textArea = logTextArea;
                 SwingUtilities.invokeLater(() -> {
-                    truncate(logTextArea.getDocument(), logTruncationLength, logTargetLength);
-                    logTextArea.append(s);
-                    logTextArea.append("\r\n");
-                    logTextArea.append(stackTrace);
-                    logTextArea.append("\r\n");
+                    truncate(textArea.getDocument(), logTruncationLength, logTargetLength);
+                    textArea.append(s);
+                    textArea.append("\r\n");
+                    textArea.append(stackTrace);
+                    textArea.append("\r\n");
                 });
             }
             if (errTextArea != null && level >= errLevel) {
+                final JTextArea textArea = errTextArea;
                 SwingUtilities.invokeLater(() -> {
-                    truncate(errTextArea.getDocument(), errTruncationLength, errTargetLength);
-                    errTextArea.append(s);
-                    errTextArea.append("\r\n");
-                    errTextArea.append(stackTrace);
-                    errTextArea.append("\r\n");
+                    truncate(textArea.getDocument(), errTruncationLength, errTargetLength);
+                    textArea.append(s);
+                    textArea.append("\r\n");
+                    textArea.append(stackTrace);
+                    textArea.append("\r\n");
                 });
             }
         }
