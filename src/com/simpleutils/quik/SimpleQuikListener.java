@@ -160,7 +160,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
      * Для реакции на коллбэки рекомендуется перегружать этот метод в потомках.
      *
      * @param callback   название коллбэка
-     * @param jsonObject JSON-объек с информацией о коллбэке
+     * @param jsonObject JSON-объект с информацией о коллбэке
      */
     protected void processCallback(final String callback, final JSONObject jsonObject) {
         switch (callback) {
