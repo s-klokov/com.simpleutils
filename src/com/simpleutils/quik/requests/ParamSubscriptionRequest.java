@@ -1,5 +1,7 @@
 package com.simpleutils.quik.requests;
 
+import com.simpleutils.quik.ClassSecCode;
+
 import java.util.Collection;
 
 /**
@@ -15,6 +17,10 @@ public class ParamSubscriptionRequest implements QuikRequest {
         this.classCode = classCode;
         this.secCode = secCode;
         this.parameters = parameters;
+    }
+
+    public ParamSubscriptionRequest(final ClassSecCode classSecCode, final Collection<String> parameters) {
+        this(classSecCode.classCode(), classSecCode.secCode(), parameters);
     }
 
     @Override

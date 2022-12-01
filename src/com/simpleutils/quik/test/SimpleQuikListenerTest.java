@@ -46,6 +46,10 @@ public class SimpleQuikListenerTest {
         simpleQuikListener.addSecurityCandles(ClassSecCode.of("TQBR", "GAZP"), List.of(5, 15, 60));
         simpleQuikListener.addSecurityCandles(ClassSecCode.of("TQBR", "LKOH"), List.of(30));
 
+        simpleQuikListener.addLevel2Quotes(ClassSecCode.of("TQBR", "SBER"));
+        simpleQuikListener.addLevel2Quotes(ClassSecCode.of("TQBR", "GAZP"));
+        simpleQuikListener.addLevel2Quotes(ClassSecCode.of("TQBR", "LKOH"));
+
         final QuikConnect quikConnect = new QuikConnect(
                 "localhost",
                 10001,
@@ -61,6 +65,16 @@ public class SimpleQuikListenerTest {
             processRunnables(simpleQuikListener.queue);
             simpleQuikListener.ensureConnection();
             simpleQuikListener.ensureSubscription();
+            if (ZonedDateTime.now().getSecond() == 0) {
+                logger.debug("Force subscription");
+                simpleQuikListener.subscribe();
+                try {
+                    //noinspection BusyWait
+                    Thread.sleep(1000L);
+                } catch (final InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
             try {
                 //noinspection BusyWait
                 Thread.sleep(100L);

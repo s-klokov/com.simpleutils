@@ -1,8 +1,10 @@
 package com.simpleutils.quik;
 
 import com.simpleutils.logs.AbstractLogger;
+import com.simpleutils.quik.requests.BulkLevel2QuotesSubscriptionRequest;
 import com.simpleutils.quik.requests.CandlesSubscriptionRequest;
 import com.simpleutils.quik.requests.ParamSubscriptionRequest;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.time.Duration;
@@ -25,6 +27,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
     protected Map<String, String> callbackSubscriptionMap = new LinkedHashMap<>();
     protected Map<ClassSecCode, Set<String>> securityParametersMap = new LinkedHashMap<>();
     protected Map<ClassSecCode, Set<Integer>> securityCandlesMap = new LinkedHashMap<>();
+    protected Set<ClassSecCode> level2QuotesSet = new LinkedHashSet<>();
 
     protected boolean isOpen = false;
     protected ZonedDateTime connectedSince = null;
@@ -85,6 +88,10 @@ public class SimpleQuikListener extends AbstractQuikListener {
         } else {
             set.addAll(intervals);
         }
+    }
+
+    public void addLevel2Quotes(final ClassSecCode classSecCode) {
+        level2QuotesSet.add(classSecCode);
     }
 
     public boolean isOpen() {
@@ -191,6 +198,9 @@ public class SimpleQuikListener extends AbstractQuikListener {
         nextSubscriptionTime = zdt;
     }
 
+    /**
+     * Регулярный вызов этого метода отслеживает подключение к терминалу QUIK.
+     */
     public void ensureConnection() {
         if (isOpen && nextCheckConnectionTime != null && ZonedDateTime.now().isAfter(nextCheckConnectionTime)) {
             try {
@@ -211,19 +221,30 @@ public class SimpleQuikListener extends AbstractQuikListener {
         }
     }
 
+    /**
+     * Регулярный вызов этого метода реализует подписку, возможно повторную, на необходимые коллбэки и рыночные данные.
+     */
     public void ensureSubscription() {
         if (isOpen && !isSubscribed && nextSubscriptionTime != null && ZonedDateTime.now().isAfter(nextSubscriptionTime)) {
-            try {
-                subscribeToCallbacks();
-                subscribeToParameters();
-                subscribeToCandles();
-                isSubscribed = true;
-            } catch (final Exception e) {
-                isSubscribed = false;
-                nextSubscriptionTime = ZonedDateTime.now().plus(subscriptionPeriod);
-                if (e instanceof InterruptedException) {
-                    Thread.currentThread().interrupt();
-                }
+            subscribe();
+        }
+    }
+
+    /**
+     * Метод для подписки на необходимые коллбэки и рыночные данные.
+     */
+    public void subscribe() {
+        try {
+            subscribeToCallbacks();
+            subscribeToParameters();
+            subscribeToCandles();
+            subscribeToLevel2Quotes();
+            isSubscribed = true;
+        } catch (final Exception e) {
+            isSubscribed = false;
+            nextSubscriptionTime = ZonedDateTime.now().plus(subscriptionPeriod);
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -243,6 +264,33 @@ public class SimpleQuikListener extends AbstractQuikListener {
     private void subscribeToCandles() throws ExecutionException, InterruptedException {
         for (final Map.Entry<ClassSecCode, Set<Integer>> entry : securityCandlesMap.entrySet()) {
             subscribeToSecurityCandles(entry.getKey(), entry.getValue());
+        }
+    }
+
+    private void subscribeToLevel2Quotes() throws ExecutionException, InterruptedException {
+        if (level2QuotesSet.isEmpty()) {
+            return;
+        }
+        final JSONObject response = quikConnect.executeMN(
+                new BulkLevel2QuotesSubscriptionRequest(level2QuotesSet).getRequest(),
+                requestTimeout.toMillis(), TimeUnit.MILLISECONDS);
+        final JSONArray result = (JSONArray) response.get("result");
+        String errorMessage = null;
+        for (final Object o : result) {
+            final JSONObject json = (JSONObject) o;
+            if (Boolean.TRUE.equals(json.get("subscribed"))) {
+                if (logger != null) {
+                    logger.debug(() -> logPrefix + "Subscribed to Level2 quotes for " + json.get("classCode") + ":" + json.get("secCode") + ".");
+                }
+            } else {
+                errorMessage = "Cannot subscribed to Level2 quotes for " + json.get("classCode") + ":" + json.get("secCode") + ".";
+                if (logger != null) {
+                    logger.debug(logPrefix + errorMessage);
+                }
+            }
+        }
+        if (errorMessage != null) {
+            throw new RuntimeException(errorMessage);
         }
     }
 
@@ -267,7 +315,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
     private void subscribeToSecurityParameters(final ClassSecCode classSecCode,
                                                final Collection<String> parameters) throws ExecutionException, InterruptedException {
         final JSONObject response = quikConnect.executeMN(
-                new ParamSubscriptionRequest(classSecCode.classCode(), classSecCode.secCode(), parameters).getRequest(),
+                new ParamSubscriptionRequest(classSecCode, parameters).getRequest(),
                 requestTimeout.toMillis(), TimeUnit.MILLISECONDS);
         if (Boolean.TRUE.equals(response.get("result"))) {
             if (logger != null) {
@@ -285,7 +333,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
     private void subscribeToSecurityCandles(final ClassSecCode classSecCode,
                                             final Collection<Integer> intervals) throws ExecutionException, InterruptedException {
         final JSONObject response = quikConnect.executeMN(
-                new CandlesSubscriptionRequest(classSecCode.classCode(), classSecCode.secCode(), intervals).getRequest(),
+                new CandlesSubscriptionRequest(classSecCode, intervals).getRequest(),
                 requestTimeout.toMillis(), TimeUnit.MILLISECONDS);
         try {
             final JSONObject result = (JSONObject) response.get("result");

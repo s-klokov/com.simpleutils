@@ -1,5 +1,10 @@
 package com.simpleutils.quik.requests;
 
+import com.simpleutils.quik.ClassSecCode;
+
+/**
+ * Запрос на получение свечных данных.
+ */
 public class CandlesRequest implements QuikRequest {
 
     private final String classCode;
@@ -12,6 +17,10 @@ public class CandlesRequest implements QuikRequest {
         this.secCode = secCode;
         this.interval = interval;
         this.maxSize = maxSize;
+    }
+
+    public CandlesRequest(final ClassSecCode classSecCode, final int interval, final int maxSize) {
+        this(classSecCode.classCode(), classSecCode.secCode(), interval, maxSize);
     }
 
     @Override

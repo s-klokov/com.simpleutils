@@ -1,5 +1,7 @@
 package com.simpleutils.quik.requests;
 
+import com.simpleutils.quik.ClassSecCode;
+
 import java.util.Collection;
 
 /**
@@ -15,6 +17,10 @@ public class CandlesSubscriptionRequest implements QuikRequest {
         this.classCode = classCode;
         this.secCode = secCode;
         this.intervals = intervals;
+    }
+
+    public CandlesSubscriptionRequest(final ClassSecCode classSecCode, final Collection<Integer> intervals) {
+        this(classSecCode.classCode(), classSecCode.secCode(), intervals);
     }
 
     @Override
