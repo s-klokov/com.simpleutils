@@ -20,6 +20,33 @@ public class MultiLogger extends AbstractLogger {
     }
 
     @Override
+    public MultiLogger withLogLevel(final int logLevel) {
+        this.logLevel = logLevel;
+        synchronized (loggers) {
+            loggers.forEach(logger -> logger.withLogLevel(logLevel));
+        }
+        return this;
+    }
+
+    @Override
+    public MultiLogger withErrLevel(final int errLevel) {
+        this.errLevel = errLevel;
+        synchronized (loggers) {
+            loggers.forEach(logger -> logger.withErrLevel(errLevel));
+        }
+        return this;
+    }
+
+    @Override
+    public MultiLogger withThreadNameEnabled(final boolean isThreadNameEnabled) {
+        this.isThreadNameEnabled = isThreadNameEnabled;
+        synchronized (loggers) {
+            loggers.forEach(logger -> logger.withThreadNameEnabled(isThreadNameEnabled));
+        }
+        return this;
+    }
+
+    @Override
     public void close() {
         synchronized (loggers) {
             loggers.forEach(AbstractLogger::close);
