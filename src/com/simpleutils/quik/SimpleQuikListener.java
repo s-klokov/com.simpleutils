@@ -72,22 +72,31 @@ public class SimpleQuikListener extends AbstractQuikListener {
         callbackSubscriptionMap.put(callback, filter);
     }
 
+    public void addSecurityParameter(final ClassSecCode classSecCode, final String parameter) {
+        securityParametersMap.computeIfAbsent(classSecCode, k -> new LinkedHashSet<>()).add(parameter);
+    }
+
+    public void addSecurityParameters(final ClassSecCode classSecCode, final String[] parameters) {
+        Collections.addAll(securityParametersMap.computeIfAbsent(classSecCode, k -> new LinkedHashSet<>()), parameters);
+    }
+
     public void addSecurityParameters(final ClassSecCode classSecCode, final Collection<String> parameters) {
-        final Set<String> set = securityParametersMap.get(classSecCode);
-        if (set == null) {
-            securityParametersMap.put(classSecCode, new LinkedHashSet<>(parameters));
-        } else {
-            set.addAll(parameters);
+        securityParametersMap.computeIfAbsent(classSecCode, k -> new LinkedHashSet<>()).addAll(parameters);
+    }
+
+    public void addSecurityCandles(final ClassSecCode classSecCode, final int interval) {
+        securityCandlesMap.computeIfAbsent(classSecCode, k -> new LinkedHashSet<>()).add(interval);
+    }
+
+    public void addSecurityCandles(final ClassSecCode classSecCode, final int[] intervals) {
+        final Set<Integer> set = securityCandlesMap.computeIfAbsent(classSecCode, k -> new LinkedHashSet<>());
+        for (final int interval : intervals) {
+            set.add(interval);
         }
     }
 
     public void addSecurityCandles(final ClassSecCode classSecCode, final Collection<Integer> intervals) {
-        final Set<Integer> set = securityCandlesMap.get(classSecCode);
-        if (set == null) {
-            securityCandlesMap.put(classSecCode, new LinkedHashSet<>(intervals));
-        } else {
-            set.addAll(intervals);
-        }
+        securityCandlesMap.computeIfAbsent(classSecCode, k -> new LinkedHashSet<>()).addAll(intervals);
     }
 
     public void addLevel2Quotes(final ClassSecCode classSecCode) {
@@ -113,6 +122,10 @@ public class SimpleQuikListener extends AbstractQuikListener {
     public boolean isOnline() {
         return isOpen && isSubscribed && connectedSince != null
                 && ZonedDateTime.now().isAfter(connectedSince.plus(onlineDuration));
+    }
+
+    public void logError(final String message, final Throwable t) {
+        logger.log(AbstractLogger.ERROR, logPrefix + message, t);
     }
 
     @Override
