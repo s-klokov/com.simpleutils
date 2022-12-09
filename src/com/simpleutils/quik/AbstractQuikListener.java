@@ -15,7 +15,7 @@ public abstract class AbstractQuikListener implements QuikListener {
     /**
      * Очередь на исполнение.
      */
-    public final Queue<Runnable> queue = new LinkedBlockingDeque<>();
+    private final Queue<Runnable> queue = new LinkedBlockingDeque<>();
 
     @Override
     public void setQuikConnect(final QuikConnect quikConnect) {
@@ -30,5 +30,10 @@ public abstract class AbstractQuikListener implements QuikListener {
     @Override
     public void submit(final Runnable runnable) {
         queue.add(runnable);
+    }
+
+    @Override
+    public Runnable poll() {
+        return queue.poll();
     }
 }

@@ -56,7 +56,7 @@ class QuikListenerTest extends AbstractQuikListener {
 
     private void processRunnables() {
         Runnable runnable;
-        while ((runnable = queue.poll()) != null) {
+        while ((runnable = poll()) != null) {
             try {
                 runnable.run();
             } catch (final Exception e) {

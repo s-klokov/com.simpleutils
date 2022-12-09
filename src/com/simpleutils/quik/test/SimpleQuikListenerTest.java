@@ -4,13 +4,13 @@ import com.simpleutils.logs.AbstractLogger;
 import com.simpleutils.logs.SimpleLogger;
 import com.simpleutils.quik.ClassSecCode;
 import com.simpleutils.quik.QuikConnect;
+import com.simpleutils.quik.QuikListener;
 import com.simpleutils.quik.SimpleQuikListener;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Queue;
 
 public class SimpleQuikListenerTest {
 
@@ -62,7 +62,7 @@ public class SimpleQuikListenerTest {
 
         final ZonedDateTime stoppingTime = ZonedDateTime.now().plus(5, ChronoUnit.MINUTES);
         while (ZonedDateTime.now().isBefore(stoppingTime) && !Thread.currentThread().isInterrupted()) {
-            processRunnables(simpleQuikListener.queue);
+            processRunnables(simpleQuikListener);
             simpleQuikListener.ensureConnection();
             simpleQuikListener.ensureSubscription();
             if (ZonedDateTime.now().getSecond() == 0) {
@@ -84,16 +84,17 @@ public class SimpleQuikListenerTest {
         }
 
         quikConnect.shutdown();
-        processRunnables(simpleQuikListener.queue);
+        processRunnables(simpleQuikListener);
     }
 
-    private void processRunnables(final Queue<Runnable> queue) {
+    private void processRunnables(final QuikListener quikListener) {
         Runnable runnable;
-        while ((runnable = queue.poll()) != null) {
+        while ((runnable = quikListener.poll()) != null) {
             try {
                 runnable.run();
             } catch (final Exception e) {
-                logger.log(AbstractLogger.ERROR, "Cannot execute a runnable from QuikListener", e);
+                logger.log(AbstractLogger.ERROR, "Cannot execute a runnable from "
+                        + quikListener.getClass().getSimpleName(), e);
             }
         }
     }

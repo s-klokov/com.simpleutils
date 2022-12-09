@@ -77,7 +77,7 @@ class QuikConnectTest {
                 @Override
                 public void run() {
                     while (!Thread.currentThread().isInterrupted()) {
-                        executeRunnables();
+                        processRunnables();
                         if (isOpen && !areRequestsDone && !quikConnect.hasErrorMN() && !quikConnect.hasErrorCB()) {
                             doRequests(quikConnect);
                             areRequestsDone = true;
@@ -93,9 +93,9 @@ class QuikConnectTest {
                     LOGGER.info("Execution thread is done");
                 }
 
-                private void executeRunnables() {
+                private void processRunnables() {
                     Runnable runnable;
-                    while ((runnable = queue.poll()) != null) {
+                    while ((runnable = poll()) != null) {
                         try {
                             runnable.run();
                         } catch (final Exception e) {

@@ -130,7 +130,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
 
     @Override
     public void onOpen() {
-        queue.add(() -> {
+        submit(() -> {
             if (logger != null) {
                 logger.debug(() -> logPrefix + "onOpen");
             }
@@ -145,7 +145,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
 
     @Override
     public void onClose() {
-        queue.add(() -> {
+        submit(() -> {
             if (logger != null) {
                 logger.debug(() -> logPrefix + "onClose");
             }
@@ -160,7 +160,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
     @Override
     public void onCallback(final JSONObject jsonObject) {
         final String callback = (String) jsonObject.get("callback");
-        queue.add(() -> {
+        submit(() -> {
             if (logger != null) {
                 logger.trace(() -> logPrefix + "onCallback " + callback);
                 logger.trace(() -> logPrefix + jsonObject);
@@ -185,7 +185,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
 
     @Override
     public void onExceptionMN(final Exception exception) {
-        queue.add(() -> {
+        submit(() -> {
             if (logger != null) {
                 logger.log(AbstractLogger.ERROR, logPrefix + "onExceptionMN", exception);
             }
@@ -195,7 +195,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
 
     @Override
     public void onExceptionCB(final Exception exception) {
-        queue.add(() -> {
+        submit(() -> {
             if (logger != null) {
                 logger.log(AbstractLogger.ERROR, logPrefix + "onExceptionCB", exception);
             }
