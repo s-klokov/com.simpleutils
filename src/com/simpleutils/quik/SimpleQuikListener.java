@@ -1,16 +1,13 @@
 package com.simpleutils.quik;
 
 import com.simpleutils.logs.AbstractLogger;
-import com.simpleutils.quik.requests.BulkLevel2QuotesSubscriptionRequest;
-import com.simpleutils.quik.requests.CandlesSubscriptionRequest;
-import com.simpleutils.quik.requests.ParamSubscriptionRequest;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -25,9 +22,6 @@ public class SimpleQuikListener extends AbstractQuikListener {
     protected AbstractLogger logger = null;
     protected String logPrefix = "";
     protected Map<String, String> callbackSubscriptionMap = new LinkedHashMap<>();
-    protected Map<ClassSecCode, Set<String>> securityParametersMap = new LinkedHashMap<>();
-    protected Map<ClassSecCode, Set<Integer>> securityCandlesMap = new LinkedHashMap<>();
-    protected Set<ClassSecCode> level2QuotesSet = new LinkedHashSet<>();
 
     protected boolean isOpen = false;
     protected ZonedDateTime connectedSince = null;
@@ -70,37 +64,6 @@ public class SimpleQuikListener extends AbstractQuikListener {
 
     public void addCallbackSubscription(final String callback, final String filter) {
         callbackSubscriptionMap.put(callback, filter);
-    }
-
-    public void addSecurityParameter(final ClassSecCode classSecCode, final String parameter) {
-        securityParametersMap.computeIfAbsent(classSecCode, k -> new LinkedHashSet<>()).add(parameter);
-    }
-
-    public void addSecurityParameters(final ClassSecCode classSecCode, final String[] parameters) {
-        Collections.addAll(securityParametersMap.computeIfAbsent(classSecCode, k -> new LinkedHashSet<>()), parameters);
-    }
-
-    public void addSecurityParameters(final ClassSecCode classSecCode, final Collection<String> parameters) {
-        securityParametersMap.computeIfAbsent(classSecCode, k -> new LinkedHashSet<>()).addAll(parameters);
-    }
-
-    public void addSecurityCandles(final ClassSecCode classSecCode, final int interval) {
-        securityCandlesMap.computeIfAbsent(classSecCode, k -> new LinkedHashSet<>()).add(interval);
-    }
-
-    public void addSecurityCandles(final ClassSecCode classSecCode, final int[] intervals) {
-        final Set<Integer> set = securityCandlesMap.computeIfAbsent(classSecCode, k -> new LinkedHashSet<>());
-        for (final int interval : intervals) {
-            set.add(interval);
-        }
-    }
-
-    public void addSecurityCandles(final ClassSecCode classSecCode, final Collection<Integer> intervals) {
-        securityCandlesMap.computeIfAbsent(classSecCode, k -> new LinkedHashSet<>()).addAll(intervals);
-    }
-
-    public void addLevel2Quotes(final ClassSecCode classSecCode) {
-        level2QuotesSet.add(classSecCode);
     }
 
     public boolean isOpen() {
@@ -249,9 +212,6 @@ public class SimpleQuikListener extends AbstractQuikListener {
     public void subscribe() {
         try {
             subscribeToCallbacks();
-            subscribeToParameters();
-            subscribeToCandles();
-            subscribeToLevel2Quotes();
             isSubscribed = true;
         } catch (final Exception e) {
             isSubscribed = false;
@@ -265,45 +225,6 @@ public class SimpleQuikListener extends AbstractQuikListener {
     private void subscribeToCallbacks() throws ExecutionException, InterruptedException {
         for (final Map.Entry<String, String> entry : callbackSubscriptionMap.entrySet()) {
             subscribeToCallback(entry.getKey(), entry.getValue());
-        }
-    }
-
-    private void subscribeToParameters() throws ExecutionException, InterruptedException {
-        for (final Map.Entry<ClassSecCode, Set<String>> entry : securityParametersMap.entrySet()) {
-            subscribeToSecurityParameters(entry.getKey(), entry.getValue());
-        }
-    }
-
-    private void subscribeToCandles() throws ExecutionException, InterruptedException {
-        for (final Map.Entry<ClassSecCode, Set<Integer>> entry : securityCandlesMap.entrySet()) {
-            subscribeToSecurityCandles(entry.getKey(), entry.getValue());
-        }
-    }
-
-    private void subscribeToLevel2Quotes() throws ExecutionException, InterruptedException {
-        if (level2QuotesSet.isEmpty()) {
-            return;
-        }
-        final JSONObject response = quikConnect.executeMN(
-                new BulkLevel2QuotesSubscriptionRequest(level2QuotesSet).getRequest(),
-                requestTimeout.toMillis(), TimeUnit.MILLISECONDS);
-        final JSONArray result = (JSONArray) response.get("result");
-        String errorMessage = null;
-        for (final Object o : result) {
-            final JSONObject json = (JSONObject) o;
-            if (Boolean.TRUE.equals(json.get("subscribed"))) {
-                if (logger != null) {
-                    logger.debug(() -> logPrefix + "Subscribed to Level2 quotes for " + json.get("classCode") + ":" + json.get("secCode") + ".");
-                }
-            } else {
-                errorMessage = "Cannot subscribed to Level2 quotes for " + json.get("classCode") + ":" + json.get("secCode") + ".";
-                if (logger != null) {
-                    logger.debug(logPrefix + errorMessage);
-                }
-            }
-        }
-        if (errorMessage != null) {
-            throw new RuntimeException(errorMessage);
         }
     }
 
@@ -322,59 +243,6 @@ public class SimpleQuikListener extends AbstractQuikListener {
                 logger.error(logPrefix + message);
             }
             throw new RuntimeException(message);
-        }
-    }
-
-    private void subscribeToSecurityParameters(final ClassSecCode classSecCode,
-                                               final Collection<String> parameters) throws ExecutionException, InterruptedException {
-        final JSONObject response = quikConnect.executeMN(
-                new ParamSubscriptionRequest(classSecCode, parameters).getRequest(),
-                requestTimeout.toMillis(), TimeUnit.MILLISECONDS);
-        if (Boolean.TRUE.equals(response.get("result"))) {
-            if (logger != null) {
-                logger.debug(() -> logPrefix + "Subscribed to " + classSecCode + " " + parameters + ".");
-            }
-            return;
-        }
-        final String message = "Cannot subscribe to " + classSecCode + " parameters " + parameters + ".";
-        if (logger != null) {
-            logger.error(logPrefix + message);
-            throw new RuntimeException(message);
-        }
-    }
-
-    private void subscribeToSecurityCandles(final ClassSecCode classSecCode,
-                                            final Collection<Integer> intervals) throws ExecutionException, InterruptedException {
-        final JSONObject response = quikConnect.executeMN(
-                new CandlesSubscriptionRequest(classSecCode, intervals).getRequest(),
-                requestTimeout.toMillis(), TimeUnit.MILLISECONDS);
-        try {
-            final JSONObject result = (JSONObject) response.get("result");
-            RuntimeException runtimeException = null;
-            for (final int interval : intervals) {
-                final String key = String.valueOf(interval);
-                if (!"ok".equals(result.get(key))) {
-                    final String message = "Cannot subscribe to " + classSecCode
-                            + " candles for interval " + interval + ": " + result.get(key);
-                    if (logger != null) {
-                        logger.error(logPrefix + message);
-                        runtimeException = new RuntimeException(message);
-                    }
-                }
-            }
-            if (runtimeException == null) {
-                if (logger != null) {
-                    logger.debug(() -> logPrefix + "Subscribed to " + classSecCode + " candles for intervals " + intervals + ".");
-                }
-            } else {
-                throw runtimeException;
-            }
-        } catch (final NullPointerException | ClassCastException e) {
-            final String message = "Cannot subscribe to " + classSecCode + " candles for intervals " + intervals + ".";
-            if (logger != null) {
-                logger.error(logPrefix + message);
-                throw new RuntimeException(message);
-            }
         }
     }
 
@@ -403,5 +271,6 @@ public class SimpleQuikListener extends AbstractQuikListener {
     }
 
     protected void onUnknownCallback(final String callback) {
+        logger.debug(() -> logPrefix + "Unknown callback: " + callback);
     }
 }

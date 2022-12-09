@@ -2,7 +2,6 @@ package com.simpleutils.quik.test;
 
 import com.simpleutils.logs.AbstractLogger;
 import com.simpleutils.logs.SimpleLogger;
-import com.simpleutils.quik.ClassSecCode;
 import com.simpleutils.quik.QuikConnect;
 import com.simpleutils.quik.QuikListener;
 import com.simpleutils.quik.SimpleQuikListener;
@@ -10,7 +9,6 @@ import com.simpleutils.quik.SimpleQuikListener;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
 public class SimpleQuikListenerTest {
 
@@ -36,19 +34,7 @@ public class SimpleQuikListenerTest {
 
         simpleQuikListener.addCallbackSubscription("OnTrade", "*");
         simpleQuikListener.addCallbackSubscription("OnOrder", "*");
-//        simpleQuikListener.addCallbackSubscription("OnAllTrade", "*");
-
-        simpleQuikListener.addSecurityParameters(ClassSecCode.of("TQBR", "SBER"), List.of("LAST", "BID", "OFFER"));
-        simpleQuikListener.addSecurityParameters(ClassSecCode.of("TQBR", "GAZP"), List.of("LAST", "BID", "OFFER"));
-        simpleQuikListener.addSecurityParameters(ClassSecCode.of("TQBR", "LKOH"), List.of("LAST", "BID", "OFFER"));
-
-        simpleQuikListener.addSecurityCandles(ClassSecCode.of("TQBR", "SBER"), List.of(1, 5, 10, 1440));
-        simpleQuikListener.addSecurityCandles(ClassSecCode.of("TQBR", "GAZP"), List.of(5, 15, 60));
-        simpleQuikListener.addSecurityCandles(ClassSecCode.of("TQBR", "LKOH"), List.of(30));
-
-        simpleQuikListener.addLevel2Quotes(ClassSecCode.of("TQBR", "SBER"));
-        simpleQuikListener.addLevel2Quotes(ClassSecCode.of("TQBR", "GAZP"));
-        simpleQuikListener.addLevel2Quotes(ClassSecCode.of("TQBR", "LKOH"));
+        simpleQuikListener.addCallbackSubscription("OnAllTrade", "*");
 
         final QuikConnect quikConnect = new QuikConnect(
                 "localhost",
