@@ -91,6 +91,13 @@ public class SimpleQuikListener extends AbstractQuikListener {
                 && ZonedDateTime.now().isAfter(connectedSince.plus(onlineDuration));
     }
 
+    public boolean isSynchronized() throws ExecutionException, InterruptedException {
+        return isConnected()
+                && Boolean.TRUE.equals(quikConnect.executeMN(
+                "ServerInfo.isSynchronized", null,
+                getRequestTimeout().toMillis(), TimeUnit.MILLISECONDS).get("result"));
+    }
+
     public void logError(final String message, final Throwable t) {
         logger.log(AbstractLogger.ERROR, logPrefix + message, t);
     }

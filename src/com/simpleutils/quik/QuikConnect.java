@@ -1,5 +1,6 @@
 package com.simpleutils.quik;
 
+import com.simpleutils.json.JSONConfig;
 import com.simpleutils.socket.SocketConnector;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -106,6 +107,15 @@ public class QuikConnect {
      * Счётчик сообщений в одной итерации рабочего цикла.
      */
     private int count = 0;
+
+    public static QuikConnect newInstance(final JSONObject config, final QuikListener quikListener) {
+        return new QuikConnect(
+                JSONConfig.getString(config, "host"),
+                JSONConfig.getInt(config, "portMN"),
+                JSONConfig.getInt(config, "portCB"),
+                JSONConfig.getString(config, "clientId"),
+                quikListener);
+    }
 
     /**
      * Конструктор.
