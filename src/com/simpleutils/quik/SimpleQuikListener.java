@@ -34,6 +34,10 @@ public class SimpleQuikListener extends AbstractQuikListener {
         callbackSubscriptionMap.put("OnDisconnected", "*");
     }
 
+    public Duration getRequestTimeout() {
+        return requestTimeout;
+    }
+
     public void setRequestTimeout(final Duration duration) {
         requestTimeout = duration;
     }
