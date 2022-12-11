@@ -7,11 +7,11 @@ import java.util.regex.Pattern;
 /**
  * Реализация интервала времени.
  *
- * @param type       тип (открытый, замкнутый или полуинтервал)
  * @param hhmmssFrom время начала в формате hhmmss
  * @param hhmmssTill время окончания в формате hhmmss
+ * @param type       тип (открытый, замкнутый или полуинтервал)
  */
-public record HhmmssInterval(HhmmssInterval.Type type, int hhmmssFrom, int hhmmssTill) {
+public record HhmmssInterval(int hhmmssFrom, int hhmmssTill, HhmmssInterval.Type type) {
 
     public enum Type {
         Open,
@@ -20,7 +20,7 @@ public record HhmmssInterval(HhmmssInterval.Type type, int hhmmssFrom, int hhmms
         Closed,
     }
 
-    public HhmmssInterval(final Type type, final int hhmmssFrom, final int hhmmssTill) {
+    public HhmmssInterval(final int hhmmssFrom, final int hhmmssTill, final Type type) {
         if (!isValid(hhmmssFrom)) {
             throw new IllegalArgumentException("Illegal hhmmssFrom=" + hhmmssFrom);
         }
@@ -32,24 +32,24 @@ public record HhmmssInterval(HhmmssInterval.Type type, int hhmmssFrom, int hhmms
         this.hhmmssTill = hhmmssTill;
     }
 
-    public static HhmmssInterval of(final Type type, final int hhmmssFrom, final int hhmmssTill) {
-        return new HhmmssInterval(type, hhmmssFrom, hhmmssTill);
+    public static HhmmssInterval of(final int hhmmssFrom, final int hhmmssTill, final Type type) {
+        return new HhmmssInterval(hhmmssFrom, hhmmssTill, type);
     }
 
     public static HhmmssInterval open(final int hhmmssFrom, final int hhmmssTill) {
-        return new HhmmssInterval(Type.Open, hhmmssFrom, hhmmssTill);
+        return new HhmmssInterval(hhmmssFrom, hhmmssTill, Type.Open);
     }
 
     public static HhmmssInterval leftOpen(final int hhmmssFrom, final int hhmmssTill) {
-        return new HhmmssInterval(Type.LeftOpen, hhmmssFrom, hhmmssTill);
+        return new HhmmssInterval(hhmmssFrom, hhmmssTill, Type.LeftOpen);
     }
 
     public static HhmmssInterval rightOpen(final int hhmmssFrom, final int hhmmssTill) {
-        return new HhmmssInterval(Type.RightOpen, hhmmssFrom, hhmmssTill);
+        return new HhmmssInterval(hhmmssFrom, hhmmssTill, Type.RightOpen);
     }
 
     public static HhmmssInterval closed(final int hhmmssFrom, final int hhmmssTill) {
-        return new HhmmssInterval(Type.Closed, hhmmssFrom, hhmmssTill);
+        return new HhmmssInterval(hhmmssFrom, hhmmssTill, Type.Closed);
     }
 
     private static final Pattern PATTERN = Pattern.compile("([\\[(\\]])(\\d{6})\\s*[;,\\-]\\s*(\\d{6})([\\[)\\]])");
@@ -59,7 +59,7 @@ public record HhmmssInterval(HhmmssInterval.Type type, int hhmmssFrom, int hhmms
      * Для замкнутого интервала используются квадратные скобки '[' и ']',
      * для открытого -- круглые скобки '(' и ')' или развёрнутые квадратные скобки ']' и '[',
      * для полуинтервалов для открытого конца используется круглая скобка или развёрнутая квадратная скобка.<br>
-     * Моменты начала и конца разделяются одним из знаков: '-', ',' или ';'.
+     * Моменты начала и конца разделяются одним из знаков: '-', ',' или ';', по краям могут стоять пробелы.
      *
      * @param s строковое представление
      * @return интервал времени
@@ -85,13 +85,16 @@ public record HhmmssInterval(HhmmssInterval.Type type, int hhmmssFrom, int hhmms
                     type = Type.Open;
                 }
             }
-            return new HhmmssInterval(type, hhmmssFrom, hhmmssTill);
+            return new HhmmssInterval(hhmmssFrom, hhmmssTill, type);
         } else {
             throw new IllegalArgumentException(s);
         }
     }
 
     public boolean contains(final int hhmmss) {
+        if (!isValid(hhmmss)) {
+            throw new IllegalArgumentException("Illegal hhmmss=" + hhmmss);
+        }
         if (hhmmssFrom <= hhmmssTill) {
             return switch (type) {
                 case Open -> hhmmssFrom < hhmmss && hhmmss < hhmmssTill;
