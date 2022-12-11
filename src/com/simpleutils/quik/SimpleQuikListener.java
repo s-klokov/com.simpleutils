@@ -1,6 +1,7 @@
 package com.simpleutils.quik;
 
 import com.simpleutils.logs.AbstractLogger;
+import com.simpleutils.quik.requests.QuikRequest;
 import org.json.simple.JSONObject;
 
 import java.time.Duration;
@@ -95,7 +96,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
         return isConnected()
                 && Boolean.TRUE.equals(quikConnect.executeMN(
                 "ServerInfo.isSynchronized", null,
-                getRequestTimeout().toMillis(), TimeUnit.MILLISECONDS).get("result"));
+                requestTimeout.toMillis(), TimeUnit.MILLISECONDS).get("result"));
     }
 
     public void logError(final String message, final Throwable t) {
@@ -283,5 +284,11 @@ public class SimpleQuikListener extends AbstractQuikListener {
 
     protected void onUnknownCallback(final String callback) {
         logger.debug(() -> logPrefix + "Unknown callback: " + callback);
+    }
+
+    protected Object executeMN(final QuikRequest quikRequest) throws ExecutionException, InterruptedException {
+        return quikConnect.executeMN(
+                quikRequest.getRequest(),
+                requestTimeout.toMillis(), TimeUnit.MILLISECONDS).get("result");
     }
 }

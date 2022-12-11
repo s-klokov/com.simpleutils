@@ -5,13 +5,13 @@ import com.simpleutils.quik.ClassSecCode;
 import java.util.Set;
 
 /**
- * Получение данных стаканов для набора инструментов.
+ * Подписка на получение данных стаканов для набора инструментов.
  */
-public class BulkLevel2QuotesRequest implements QuikRequest {
+public class BulkQuoteLevel2SubscriptionRequest implements QuikRequest {
 
     private final Set<ClassSecCode> classSecCodes;
 
-    public BulkLevel2QuotesRequest(final Set<ClassSecCode> classSecCodes) {
+    public BulkQuoteLevel2SubscriptionRequest(final Set<ClassSecCode> classSecCodes) {
         this.classSecCodes = classSecCodes;
     }
 
@@ -24,7 +24,7 @@ public class BulkLevel2QuotesRequest implements QuikRequest {
             sb.append("  [").append(++counter).append("] ")
                     .append("= { classCode = \"").append(classSecCode.classCode())
                     .append("\", secCode = \"").append(classSecCode.secCode())
-                    .append("\", quotes = getQuoteLevel2(\"").append(classSecCode.classCode())
+                    .append("\", subscribed = Subscribe_Level_II_Quotes(\"").append(classSecCode.classCode())
                     .append("\", \"").append(classSecCode.secCode()).append("\"), },\n");
         }
         sb.append("}");

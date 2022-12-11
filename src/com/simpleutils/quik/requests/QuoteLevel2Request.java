@@ -5,17 +5,17 @@ import com.simpleutils.quik.ClassSecCode;
 /**
  * Запрос на получение данных стакана по указанным коду класса и коду инструмента.
  */
-public class Level2QuotesRequest implements QuikRequest {
+public class QuoteLevel2Request implements QuikRequest {
 
     private final String classCode;
     private final String secCode;
 
-    public Level2QuotesRequest(final String classCode, final String secCode) {
+    public QuoteLevel2Request(final String classCode, final String secCode) {
         this.classCode = classCode;
         this.secCode = secCode;
     }
 
-    public Level2QuotesRequest(final ClassSecCode classSecCode) {
+    public QuoteLevel2Request(final ClassSecCode classSecCode) {
         this(classSecCode.classCode(), classSecCode.secCode());
     }
 
