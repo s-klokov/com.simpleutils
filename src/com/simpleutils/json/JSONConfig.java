@@ -19,6 +19,10 @@ import java.util.Objects;
  */
 public class JSONConfig {
 
+    private JSONConfig() {
+        throw new UnsupportedOperationException();
+    }
+
     /**
      * Прочитать конфигурационный файл, удалить из него комментарии и преобразовать в JSON-объект.
      *
