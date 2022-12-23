@@ -30,6 +30,9 @@ public class SimpleQuikListener extends AbstractQuikListener {
     protected boolean isSubscribed = false;
     protected ZonedDateTime nextSubscriptionTime = null;
 
+    private boolean prevSynchronized = false;
+    private boolean currSynchronized = false;
+
     public SimpleQuikListener() {
         executionThread = Thread.currentThread();
         callbackSubscriptionMap.put("OnDisconnected", "*");
@@ -93,10 +96,28 @@ public class SimpleQuikListener extends AbstractQuikListener {
     }
 
     public boolean isSynchronized() throws ExecutionException, InterruptedException {
-        return isConnected()
-                && Boolean.TRUE.equals(quikConnect.executeMN(
-                "ServerInfo.isSynchronized", null,
-                requestTimeout.toMillis(), TimeUnit.MILLISECONDS).get("result"));
+        prevSynchronized = currSynchronized;
+        try {
+            currSynchronized = isConnected()
+                    && Boolean.TRUE.equals(quikConnect.executeMN(
+                    "ServerInfo.isSynchronized", null,
+                    requestTimeout.toMillis(), TimeUnit.MILLISECONDS).get("result"));
+            return currSynchronized;
+        } catch (final ExecutionException | InterruptedException e) {
+            currSynchronized = false;
+            if (e instanceof InterruptedException) {
+                Thread.currentThread().interrupt();
+            }
+            throw e;
+        }
+    }
+
+    public boolean isCurrSynchronized() {
+        return currSynchronized;
+    }
+
+    public boolean isPrevSynchronized() {
+        return prevSynchronized;
     }
 
     public void logError(final String message, final Throwable t) {
