@@ -9,6 +9,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -30,8 +31,8 @@ public class SimpleQuikListener extends AbstractQuikListener {
     protected boolean isSubscribed = false;
     protected ZonedDateTime nextSubscriptionTime = null;
 
-    private boolean prevSynchronized = false;
-    private boolean currSynchronized = false;
+    private Boolean prevSynchronized = null;
+    private Boolean currSynchronized = null;
 
     public SimpleQuikListener() {
         executionThread = Thread.currentThread();
@@ -112,12 +113,8 @@ public class SimpleQuikListener extends AbstractQuikListener {
         }
     }
 
-    public boolean isCurrSynchronized() {
-        return currSynchronized;
-    }
-
-    public boolean isPrevSynchronized() {
-        return prevSynchronized;
+    public boolean isSynchronizedChanged() {
+        return !Objects.equals(prevSynchronized, currSynchronized);
     }
 
     public void logError(final String message, final Throwable t) {
