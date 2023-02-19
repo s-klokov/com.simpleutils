@@ -9,4 +9,5 @@ module com.simpleutils {
     exports com.simpleutils.quik;
     exports com.simpleutils.socket;
     exports com.simpleutils.quik.requests;
+    exports com.simpleutils.email;
 }

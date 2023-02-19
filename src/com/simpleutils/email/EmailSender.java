@@ -1,4 +1,4 @@
-package com.simpleutils;
+package com.simpleutils.email;
 
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
@@ -46,14 +46,14 @@ public class EmailSender {
      * <p>
      * Пример файла настроек:
      * <pre>
-     * mail.smtp.user = user@yandex.ru
+     * mail.smtp.user = user@domain.biz
      * mail.smtp.password = pa$$W0rd
      * mail.transport.protocol = smtps
-     * mail.smtp.host = smtp.yandex.ru
-     * mail.smtp.port = 465
+     * mail.smtp.host = smtp.domain.biz
+     * mail.smtp.port = 587
      * mail.smtp.ssl.enable = true
      * mail.smtp.auth = true
-     * mail.smtp.ssl.trust=yandex.ru (для самоподписанных сертификатов)
+     * mail.smtp.ssl.trust=*.domain.biz (для самоподписанных сертификатов)
      * </pre>
      *
      * @param properties файл с настройками
