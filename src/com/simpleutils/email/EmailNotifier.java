@@ -1,7 +1,7 @@
 package com.simpleutils.email;
 
 import com.simpleutils.logs.AbstractLogger;
-import com.simpleutils.logs.DailyLogger;
+import com.simpleutils.logs.SevenDaysLogger;
 
 import javax.mail.MessagingException;
 import java.io.File;
@@ -32,15 +32,14 @@ import java.util.List;
 class EmailNotifier {
 
     private static final Thread mainThread = Thread.currentThread();
-    private final DailyLogger logger;
+    private final AbstractLogger logger;
     private EmailSender emailSender = null;
     private int minute = -1;
 
     private EmailNotifier() {
-        logger = new DailyLogger(
-                "logs/" + EmailNotifier.class.getSimpleName() + "_%d.log",
-                "logs/" + EmailNotifier.class.getSimpleName() + "_%d_error.log"
-        );
+        logger = new SevenDaysLogger(
+                "logs/" + EmailNotifier.class.getSimpleName() + ".%d.log",
+                "logs/" + EmailNotifier.class.getSimpleName() + ".%d.err");
         logger.info("STARTED");
     }
 
@@ -142,7 +141,7 @@ class EmailNotifier {
                     }
                     logger.info("Moving file " + file.getName() + " to sent folder...");
                     Files.move(path, new File("sent", file.getName()).toPath(),
-                               StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+                            StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
                     logger.info("Done.");
                 } catch (final IOException e) {
                     logger.log(AbstractLogger.ERROR, "Cannot process file " + file.getAbsolutePath(), e);

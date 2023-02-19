@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.simpleutils">
+
+    <target name=".compile.and.jar">
+        <property name="modules.dir" value="${basedir}/../*/src"/>
+        <property name="libraries.dir" value="${basedir}/../../jar"/>
+        <property name="release.dir" value="${basedir}/../out/release"/>
+        <property name="jar.dir" value="${release.dir}/${main.class.name}"/>
+        <property name="classes.dir" value="${jar.dir}/classes"/>
+
+        <!-- Replace "." by "/" in main.class.path to get filename -->
+        <loadresource property="filename">
+            <propertyresource name="main.class.path"/>
+            <filterchain>
+                <tokenfilter>
+                    <replacestring from="." to="/"/>
+                </tokenfilter>
+            </filterchain>
+        </loadresource>
+
+        <!-- Create empty directory -->
+        <mkdir dir="${jar.dir}"/>
+        <delete includeemptydirs="true">
+            <fileset dir="${jar.dir}" includes="**/*"/>
+        </delete>
+
+        <!-- Create directory for classes -->
+        <mkdir dir="${classes.dir}"/>
+
+        <!-- Main class compilation -->
+        <javac
+                encoding="UTF-8"
+                destdir="${classes.dir}"
+                source="17"
+                target="17"
+                modulesourcepath="${modules.dir}"
+                includes="${filename}.java"
+                includeantruntime="false">
+            <compilerarg line="-p ${libraries.dir}"/>
+        </javac>
+
+        <!-- Create jar omitting module-info's -->
+        <jar destfile="${jar.dir}/${main.class.name}.jar">
+            <fileset dir="${classes.dir}/com.simpleutils"
+                     excludes="**/module-info.class"/>
+            <fileset dir="${classes.dir}/com.simpleutils"
+                     excludes="**/module-info.class"/>
+            <fileset dir="${classes.dir}/com.simpleutils"
+                     excludes="**/module-info.class"/>
+            <manifest>
+                <attribute name="Main-Class" value="${main.class.path}"/>
+            </manifest>
+        </jar>
+
+        <!-- Remove classes directory -->
+        <delete dir="${classes.dir}"/>
+
+        <!-- Create cmd-file -->
+        <echo file="${jar.dir}/${main.class.name}.cmd" append="false">@echo off
+start "${main.class.name}" java ${VMOptions} -p ".;../jar" -jar ${main.class.name}.jar ${program.arguments}
+        </echo>
+    </target>
+
+    <target name="EmailNotifier">
+        <antcall target=".compile.and.jar">
+            <param name="main.class.name" value="EmailNotifier"/>
+            <param name="main.class.path" value="com.simpleutils.email.EmailNotifier"/>
+            <param name="VMOptions" value=""/>
+            <param name="program.arguments" value="-Xmx64m"/>
+        </antcall>
+    </target>
+
+</project>
