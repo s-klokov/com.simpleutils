@@ -13,24 +13,76 @@ import java.nio.file.Files;
 import java.util.Objects;
 
 /**
- * Чтение конфигурационного файла, содержащего JSON-объект.
- * <p>
- * Строки, начинающиеся с пробельных символов, рассматриваются как комментарии и игнорируются.
+ * Класс для работы с JSON-конфигурациями.
  */
 public class JSONConfig {
 
-    private JSONConfig() {
-        throw new UnsupportedOperationException();
+    private final JSONObject jsonObject;
+
+    public JSONConfig() {
+        jsonObject = null;
+    }
+
+    public JSONConfig(final Object object) {
+        jsonObject = (JSONObject) object;
+    }
+
+    public JSONConfig(final File file) throws IOException, ParseException, ClassCastException {
+        jsonObject = (JSONObject) read(file);
+    }
+
+    public boolean getBoolean(final String key) {
+        return getBoolean(jsonObject, key);
+    }
+
+    public long getLong(final String key) {
+        return getLong(jsonObject, key);
+    }
+
+    public int getInt(final String key) {
+        return getInt(jsonObject, key);
+    }
+
+    public double getDouble(final String key) {
+        return getDouble(jsonObject, key);
+    }
+
+    public String getString(final String key) {
+        return getString(jsonObject, key);
+    }
+
+    public String getStringNonNull(final String key) {
+        return getStringNonNull(jsonObject, key);
+    }
+
+    public JSONObject getJSONObject(final String key) {
+        return getJSONObject(jsonObject, key);
+    }
+
+    public JSONArray getJSONArray(final String key) {
+        return getJSONArray(jsonObject, key);
+    }
+
+    public boolean getOrDefault(final String key, final boolean defaultValue) {
+        return getOrDefault(jsonObject, key, defaultValue);
+    }
+
+    public long getOrDefault(final String key, final long defaultValue) {
+        return getOrDefault(jsonObject, key, defaultValue);
+    }
+
+    public String getOrDefault(final String key, final String defaultValue) {
+        return getOrDefault(jsonObject, key, defaultValue);
     }
 
     /**
-     * Прочитать конфигурационный файл, удалить из него комментарии и преобразовать в JSON-объект.
+     * Прочитать конфигурационный файл, удалить из него комментарии и преобразовать в JSONObject или JSONArray.
      *
      * @param file файл
-     * @return JSON-объект
+     * @return JSONObject или JSONArray
      * @throws IOException        если произошла ошибка ввода-вывода
      * @throws ParseException     если не удалось выполнить парсинг
-     * @throws ClassCastException если результат не является JSON-объектом
+     * @throws ClassCastException если результат чтения из файла не является JSONObject или JSONArray
      */
     public static JSONAware read(final File file) throws IOException, ParseException, ClassCastException {
         final StringBuilder sb = new StringBuilder();
