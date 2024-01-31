@@ -31,8 +31,8 @@
         <javac
                 encoding="UTF-8"
                 destdir="${classes.dir}"
-                source="17"
-                target="17"
+                source="21"
+                target="21"
                 modulesourcepath="${modules.dir}"
                 includes="${filename}.java"
                 includeantruntime="false">
