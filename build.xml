@@ -59,6 +59,12 @@
         <echo file="${jar.dir}/${main.class.name}.cmd" append="false">@echo off
 start "${main.class.name}" java ${VMOptions} -p ".;../jar" -jar ${main.class.name}.jar ${program.arguments}
         </echo>
+
+        <!-- Create sh-file -->
+        <echo file="${jar.dir}/${main.class.name}.sh" append="false">#!/bin/sh
+# cd /to/folder
+java ${VMOptions} -p ".:../jar" -jar ${main.class.name}.jar ${program.arguments}
+        </echo>
     </target>
 
     <target name="EmailNotifier">
