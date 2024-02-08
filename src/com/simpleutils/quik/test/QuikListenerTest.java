@@ -7,7 +7,6 @@ import com.simpleutils.quik.QuikConnect;
 import org.json.simple.JSONObject;
 
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -71,7 +70,7 @@ class QuikListenerTest extends AbstractQuikListener {
         final QuikConnect quikConnect = new QuikConnect("127.0.0.1", 10001, 10002, "test", quikListenerTest);
         quikListenerTest.setQuikConnect(quikConnect);
         quikConnect.start();
-        final ZonedDateTime stoppingTime = ZonedDateTime.now().plus(1, ChronoUnit.MINUTES);
+        final ZonedDateTime stoppingTime = ZonedDateTime.now().plusMinutes(1);
         int counter = 0;
         final StringBuilder sb = new StringBuilder();
         while (ZonedDateTime.now().isBefore(stoppingTime)) {

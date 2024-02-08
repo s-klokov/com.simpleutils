@@ -23,7 +23,7 @@ public class SimpleQuikListener extends AbstractQuikListener {
 
     protected AbstractLogger logger = null;
     protected String logPrefix = "";
-    protected Map<String, String> callbackSubscriptionMap = new LinkedHashMap<>();
+    protected final Map<String, String> callbackSubscriptionMap = new LinkedHashMap<>();
 
     protected boolean isOpen = false;
     protected ZonedDateTime connectedSince = null;

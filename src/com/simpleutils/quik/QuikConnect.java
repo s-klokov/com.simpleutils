@@ -98,11 +98,11 @@ public class QuikConnect {
     /**
      * Момент возникновения ошибки взаимодействия с терминалом.
      */
-    private volatile ZonedDateTime errorTime = ZonedDateTime.now().minus(1, ChronoUnit.YEARS);
+    private volatile ZonedDateTime errorTime = ZonedDateTime.now().minusYears(1);
     /**
      * Момент отправки сообщения "ping".
      */
-    private ZonedDateTime lastPingTime = ZonedDateTime.now().minus(1, ChronoUnit.YEARS);
+    private ZonedDateTime lastPingTime = ZonedDateTime.now().minusYears(1);
     /**
      * Счётчик сообщений в одной итерации рабочего цикла.
      */

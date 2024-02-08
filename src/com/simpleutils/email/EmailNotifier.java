@@ -116,7 +116,7 @@ class EmailNotifier {
                     String subject = "No subject";
                     final StringBuilder message = new StringBuilder();
                     for (final String line : lines) {
-                        if (message.length() == 0) {
+                        if (message.isEmpty()) {
                             if (line.startsWith("to=") && line.contains("@")) {
                                 toList.add(line.substring("to=".length()).trim());
                             } else if (line.startsWith("subject=")) {

@@ -46,7 +46,7 @@ public class SimpleQuikListenerTest {
 
         quikConnect.start();
 
-        final ZonedDateTime stoppingTime = ZonedDateTime.now().plus(5, ChronoUnit.MINUTES);
+        final ZonedDateTime stoppingTime = ZonedDateTime.now().plusMinutes(5);
         while (ZonedDateTime.now().isBefore(stoppingTime) && !Thread.currentThread().isInterrupted()) {
             processRunnables(simpleQuikListener);
             simpleQuikListener.ensureConnection();
