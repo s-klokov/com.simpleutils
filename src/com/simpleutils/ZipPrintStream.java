@@ -14,9 +14,30 @@ public class ZipPrintStream {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Создать объект типа {@link java.io.PrintStream}, который осуществляет запись в zip-файл.
+     *
+     * @param zipFile      zip-файл
+     * @param zipEntryName имя zipEntry внутри zip-файла
+     * @return объект типа {@link java.io.PrintStream}
+     * @throws IOException если произошла ошибка ввода-вывода
+     */
     public static PrintStream newZipPrintStream(final File zipFile, final String zipEntryName) throws IOException {
         final ZipOutputStream zipOut = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(zipFile)));
         zipOut.putNextEntry(new ZipEntry(zipEntryName));
         return new PrintStream(zipOut, false, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Создать объект типа {@link java.io.PrintStream}, который осуществляет запись в zip-файл.
+     * <p>
+     * Имя zip-файла создаётся автоматически путём добавления ".zip" к имени zipEntry.
+     *
+     * @param zipEntryName имя zipEntry
+     * @return объект типа {@link java.io.PrintStream}
+     * @throws IOException если произошла ошибка ввода-вывода
+     */
+    public static PrintStream newZipPrintStream(final String zipEntryName) throws IOException {
+        return newZipPrintStream(new File(zipEntryName + ".zip"), zipEntryName);
     }
 }
