@@ -6,7 +6,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
- * Утилитарный класс для получения объекта типа {@link java.io.PrintStream}, который осуществляет запись в zip-файл.
+ * Утилитарный класс для получения объекта типа {@link PrintStream}, который осуществляет запись в zip-файл.
  */
 public class ZipPrintStream {
 
@@ -15,11 +15,11 @@ public class ZipPrintStream {
     }
 
     /**
-     * Создать объект типа {@link java.io.PrintStream}, который осуществляет запись в zip-файл.
+     * Создать объект типа {@link PrintStream}, который осуществляет запись в zip-файл.
      *
      * @param zipFile      zip-файл
      * @param zipEntryName имя zipEntry внутри zip-файла
-     * @return объект типа {@link java.io.PrintStream}
+     * @return объект типа {@link PrintStream}
      * @throws IOException если произошла ошибка ввода-вывода
      */
     public static PrintStream newZipPrintStream(final File zipFile, final String zipEntryName) throws IOException {
@@ -29,12 +29,12 @@ public class ZipPrintStream {
     }
 
     /**
-     * Создать объект типа {@link java.io.PrintStream}, который осуществляет запись в zip-файл.
+     * Создать объект типа {@link PrintStream}, который осуществляет запись в zip-файл.
      * <p>
      * Имя zip-файла создаётся автоматически путём добавления ".zip" к имени zipEntry.
      *
      * @param zipEntryName имя zipEntry
-     * @return объект типа {@link java.io.PrintStream}
+     * @return объект типа {@link PrintStream}
      * @throws IOException если произошла ошибка ввода-вывода
      */
     public static PrintStream newZipPrintStream(final String zipEntryName) throws IOException {
