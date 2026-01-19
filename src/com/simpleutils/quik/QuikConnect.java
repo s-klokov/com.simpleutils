@@ -325,9 +325,9 @@ public class QuikConnect {
 
             private void pause(final Duration duration) {
                 try {
-                    Thread.sleep(duration.toMillis());
+                    sleep(duration.toMillis());
                 } catch (final InterruptedException e) {
-                    Thread.currentThread().interrupt();
+                    currentThread().interrupt();
                 }
             }
 

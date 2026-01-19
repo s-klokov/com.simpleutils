@@ -76,7 +76,7 @@ class QuikConnectTest {
             executionThread = new Thread() {
                 @Override
                 public void run() {
-                    while (!Thread.currentThread().isInterrupted()) {
+                    while (!currentThread().isInterrupted()) {
                         processRunnables();
                         if (isOpen && !areRequestsDone && !quikConnect.hasErrorMN() && !quikConnect.hasErrorCB()) {
                             doRequests(quikConnect);
@@ -84,9 +84,9 @@ class QuikConnectTest {
                         }
                         try {
                             //noinspection BusyWait
-                            Thread.sleep(1L);
+                            sleep(1L);
                         } catch (final InterruptedException e) {
-                            Thread.currentThread().interrupt();
+                            currentThread().interrupt();
                             break;
                         }
                     }
@@ -130,7 +130,7 @@ class QuikConnectTest {
                                 "function(t) return t.class_code == \"TQBR\" and t.sec_code == \"AFLT\" end",
                                 5, TimeUnit.SECONDS));
                     } catch (final InterruptedException e) {
-                        Thread.currentThread().interrupt();
+                        currentThread().interrupt();
                     } catch (final Exception e) {
                         LOGGER.log(AbstractLogger.ERROR, e.getMessage(), e);
                     }

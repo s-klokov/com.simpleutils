@@ -123,7 +123,7 @@ public class SevenDaysLogger extends AbstractLogger {
             try {
                 logStream = new PrintStream(new FileOutputStream(newLogFileName, true), true, StandardCharsets.UTF_8);
             } catch (final IOException e) {
-                log(AbstractLogger.ERROR, "Cannot change log file", e);
+                log(ERROR, "Cannot change log file", e);
             }
         }
     }

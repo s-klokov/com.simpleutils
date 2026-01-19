@@ -116,7 +116,7 @@ public class DailyLogger extends AbstractLogger {
                 close();
                 logStream = ps;
             } catch (final IOException e) {
-                log(AbstractLogger.ERROR, "Cannot change log file", e);
+                log(ERROR, "Cannot change log file", e);
             }
         }
     }
