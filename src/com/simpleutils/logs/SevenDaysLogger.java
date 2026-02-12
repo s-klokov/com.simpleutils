@@ -10,6 +10,7 @@ import java.util.Objects;
  * Файлы логов в своём названии содержат номер дня недели в виде числа от 1 (понедельник) до 7 (воскресенье).
  * Старые файлы перезаписываются новыми в процессе работы.
  */
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public class SevenDaysLogger extends AbstractLogger {
     /**
      * Объект для синхронизации.

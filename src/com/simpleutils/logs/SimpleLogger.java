@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 /**
  * Реализация простого логгирования.
  */
+@SuppressWarnings("unused")
 public class SimpleLogger extends AbstractLogger {
 
     /**

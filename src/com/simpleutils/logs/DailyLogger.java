@@ -12,6 +12,7 @@ import java.util.Objects;
  * Логгер, осуществляющий запись в ежедневные файлы лога и дублирующий сообщения об ошибках в отдельные файлы.
  * Ежедневные файлы в своём имени содержат дату в формате YYYYMMDD.
  */
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public class DailyLogger extends AbstractLogger {
 
     /**

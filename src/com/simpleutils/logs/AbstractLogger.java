@@ -3,6 +3,7 @@ package com.simpleutils.logs;
 import java.util.Formatter;
 import java.util.function.Supplier;
 
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public abstract class AbstractLogger {
     /* Константы для уровней логгирования. */
     public static final int FATAL = 6;
@@ -24,6 +25,7 @@ public abstract class AbstractLogger {
      */
     protected volatile boolean isThreadNameEnabled = true;
 
+    @SuppressWarnings("NonStrictComparisonCanBeEquality")
     protected static String messageType(final int level) {
         if (level >= FATAL) {
             return "[FATAL]";

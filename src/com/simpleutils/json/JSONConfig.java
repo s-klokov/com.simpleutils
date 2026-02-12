@@ -15,6 +15,7 @@ import java.util.Objects;
 /**
  * Класс для работы с JSON-конфигурациями.
  */
+@SuppressWarnings("unused")
 public class JSONConfig {
 
     private final JSONObject jsonObject;

@@ -3,6 +3,7 @@ package com.simpleutils.logs;
 import java.util.HashSet;
 import java.util.Set;
 
+@SuppressWarnings({"UnusedReturnValue", "unused"})
 public class MultiLogger extends AbstractLogger {
 
     private final Set<AbstractLogger> loggers = new HashSet<>();

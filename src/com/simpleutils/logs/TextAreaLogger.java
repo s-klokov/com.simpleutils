@@ -7,6 +7,7 @@ import javax.swing.text.Document;
 /**
  * Реализация логгирования с выводом в объекты типа {@link JTextArea}.
  */
+@SuppressWarnings("UnusedReturnValue")
 public class TextAreaLogger extends AbstractLogger {
 
     public volatile long logTruncationLength = 1_200_000L;
